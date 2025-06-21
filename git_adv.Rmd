@@ -1,0 +1,287 @@
+---
+title: "Advance Git"
+author: "Md Rasheduzzaman"
+date: "2025-06-21"
+output: html_document
+---
+
+# Advance Tasks
+
+## What if your cloned repo is out of date (new changes happened)?
+Run this to pull the up to date repo.
+```{bash, eval=FALSE}
+git pull origin main
+```
+(Use `master` if that's your primary branch name.)  
+
+Git will then download any new commits and files from GitHub and integrate them into your local branch. If there are no new changes, it will simply tell you "Already up to date."
+
+**Important:** It's a good habit to `git pull` before you start working on a project each day, or before you begin a new set of changes, to ensure you're always working with the most current version. This helps avoid potential merge conflicts later on.
+
+## How to make changes directly on GitHub and then pull them
+
+**N.B. After this discussion, we'll get into the exciting world of branches and collaboration!**
+
+**Do these**  
+1. Navigate to your repository on GitHub.com  
+2. Edit the file  
+3. Commit the changes  
+4. Pull the changes to your local machine  
+
+- Open your terminal or Git Bash.
+- Navigate to your local repository folder using `cd your-repo-name`.
+
+Run the git pull command:
+```{bash, eval=FALSE}
+git pull origin main
+```
+(Again, use `master` if that's your primary branch name.) 
+
+## Collaborating with Others: Branches and Pull Requests
+
+Now for some really powerful stuff! So far, we've been working on a single line of development (the `main` or `master` branch). But what if you're working with a team, or you want to experiment with new features without breaking the main, working version of your project? This is where branches come in.
+
+### 1. Understanding Branches
+
+Think of a branch as an independent line of development. When you create a branch, you're essentially making a copy of your project at a specific point in time. You can then make changes on this new branch without affecting the original (`main`) branch.
+
+- `main` (or `master`) branch: This is typically considered the stable, production-ready version of your project.
+- Feature branches: You create these for new features, bug fixes, or experiments. You work on them in isolation.
+Once you're done with your work on a feature branch and it's stable, you can merge it back into the `main` branch.
+
+**Why use branches?**
+
+- Isolation: Work on new features without impacting the stable code.
+- Collaboration: Multiple developers can work on different features simultaneously without stepping on each others toes.
+- Experimentation: Try out new ideas without fear of breaking the main project.
+
+### 2. Creating and Switching Branches Locally
+
+Let's practice creating a new branch.
+
+**Scenario:** You want to add a new "Contact Us" page to your website, but you don't want to touch the live code until it's ready.
+
+Steps:
+
+1. Ensure you're on the main branch and up to date:
+```{bash, eval=FALSE}
+git checkout main
+git pull origin main
+```
+`git checkout main` ensures you're on the `main` branch. `git pull` ensures your `main` branch has all the latest changes from GitHub.
+
+2. Create a new branch:
+```{bash, eval=FALSE}
+git branch feature/contact-page
+```
+(It's common to name branches descriptively, often starting with `feature/`, `bugfix/`, `hotfix/`, etc.)
+
+This command creates the branch but doesn't switch you to it yet.
+
+3. Switch to your new branch:
+```{bash, eval=FALSE}
+git checkout feature/contact-page
+```
+You'll see a message like "Switched to branch 'feature/contact-page'".
+
+**Pro Tip:** You can combine steps 2 and 3 into one command:
+```{bash, eval=FALSE}
+git checkout -b feature/contact-page
+```
+4. Verify your current branch:
+```{bash, eval=FALSE}
+git branch
+```
+The branch you're currently on will have an asterisk (*) next to its name.
+
+Now you are on your `feature/contact-page` branch. Any changes you make, commit, and push will be on this branch, completely separate from `main`.
+```{bash, eval=FALSE}
+git status
+git add .
+git commit -m "created contatc.txt file in the feature branch"
+git push origin feature/contact-page
+```
+Once you've finished your work on a branch and thoroughly tested it, the next step is to merge it back into the `main` branch.
+
+### 3. Merging a Branch (Bringing Your Changes Back)
+Merging is the process of integrating the changes from one branch (like your `feature/contact-page` branch) into another branch (typically `main`).
+
+**Scenario:** You've added your "Contact Us" page, it's working perfectly, and you're ready to make it part of the main website.
+
+Steps:  
+1. Ensure you're on the `main` branch and up to date:
+
+```{bash, eval=FALSE}
+git checkout main
+git pull origin main
+```
+This is crucial! You want to merge your changes into the latest version of `main`.
+
+2. Merge your feature branch into `main`:
+```{bash, eval=FALSE}
+git merge feature/contact-page
+```
+This command tells Git to take all the changes from the `feature/contact-page` branch and apply them to the `main` branch.
+
+**Automatic Merging:** If Git can figure out how to combine the changes without any conflicts, it will do so automatically. You might see a message like "Successfully merged."
+
+**Merge Conflicts:** Sometimes, if both branches have changed the same lines in the same file, Git won't know how to proceed. This results in a merge conflict. We'll cover how to resolve these in a moment.
+
+3. (If the merge was successful) Push the merged `main` branch to GitHub:
+```{bash, eval=FALSE}
+git push origin main
+```
+This uploads the merged changes to the remote `main` branch on GitHub.
+
+### 4. Deleting the Feature Branch (Optional but Recommended)
+Delete the branch locally:
+First, ensure you're **not** on the branch you want to delete. Switch back to `main`:
+```{bash, eval=FALSE}
+git checkout main
+```
+Then, delete the local branch:
+```{bash, eval=FALSE}
+git branch -d feature/contact-page
+```
+- The `-d` flag is for "delete." Git will prevent deletion if the branch has unmerged changes.
+- If you really want to delete a branch with unmerged changes (use with caution!), you can use the force delete flag: `git branch -D feature/contact-page` (capital D).
+
+Dealing with Merge Conflicts
+Merge conflicts happen when Git can't automatically reconcile changes between branches. It's not a disaster! It just means you need to manually tell Git how to combine the changes.
+
+**Scenario:** You and a collaborator both edited the same section of a file on different branches.
+
+What you'll see:
+
+- Git will add special markers to the conflicting file, showing the changes from both branches. It will look something like this:
+```{bash, eval=FALSE}
+<<<<<<< HEAD
+// Your changes on the main branch
+=======
+// Your collaborator's changes on the feature branch
+>>>>>>> feature/contact-page
+```
+- `<<<<<<< HEAD`: Marks the beginning of the changes on your current branch (main).
+- `=======`: Separates your changes from the changes on the other branch.
+- `>>>>>>> feature/contact-page`: Marks the end of the changes on the `feature/contact-page` branch.
+
+**How to resolve a conflict:**
+
+1. Open the conflicting file in a text editor: You'll see the conflict markers.
+
+2. Manually edit the file: Decide how you want to combine the changes. You might:
+
+  - Keep only your changes.
+  - Keep only the other branch's changes.
+  - Combine parts of both.
+  - Rewrite the section entirely.
+  - Remove the conflict markers: Delete the `<<<<<<< HEAD`, `=======`, and `>>>>>>> feature/contact-page` lines.
+
+3. Save the file.
+
+4. Stage the resolved file:
+```{bash, eval=FALSE}
+git add your-conflicting-file.txt
+```
+
+5. Commit the merge:
+```{bash, eval=FALSE}
+git commit -m "Resolve merge conflict in your-conflicting-file.txt"
+```
+6. Push the merged branch:
+```{bash, eval=FALSE}
+git push origin main
+```
+Now the conflict is resolved, and your changes are safely merged!
+
+### 5. Pull Requests (PRs): The Heart of Collaboration
+
+While you can merge branches locally, in a collaborative environment, the most common way to integrate changes is through a Pull Request (PR) on GitHub. A Pull Request is essentially a formal proposal to merge your changes from a feature branch into another branch (usually `main`).
+
+**Why use Pull Requests?**
+
+- Code Review: It allows other team members to review your code, provide feedback, and suggest improvements before the changes are merged into the main codebase. This catches bugs and ensures code quality.
+- Discussion: PRs provide a dedicated space for discussion about the changes.
+- Automated Checks: GitHub can be configured to run automated tests or checks on PRs, ensuring the new code doesn't break existing functionality.
+- Record Keeping: PRs create a clear history of how and why changes were integrated.
+
+**Scenario:** You've completed your `feature/contact-page` and pushed it to GitHub. Now you want your team to review it and eventually merge it into main.
+
+Steps to create a Pull Request:  
+1. At first, pull the repo to your local machine and make changes:
+```{bash, eval=FALSE}
+git clone git@github.com:yourusername/repoLink.git
+git checkout main
+git checkout -b feature/contact-page
+#you can name your branch with something else depending on your task 
+#Now make changes (files) or do whatever you want to do with coding
+#Then push the changes
+git status
+git add .
+git commit -m "My contribution"
+git push origin feature/contact-page
+```
+Before you can create a PR, your branch needs to exist on GitHub. If you just created it locally and committed changes, you'll need to push it up. 
+
+The first time you push a new branch, Git might give you a hint like:
+`git push --set-upstream origin feature/contact-page`
+Just copy and paste that command if you see it.  
+2. Go to your repository on GitHub.com:
+Once your branch is pushed, GitHub will often display a banner at the top of your repository page, suggesting you **"Compare & pull request"** for your newly pushed branch. If not, click on the **"Pull requests"** tab.  
+3. Click **"New pull request"**:
+If the banner isn't there, click the green **"New pull request"** button.  
+4.Select your branches:  
+
+  - Base branch: This is the branch you want to merge into (e.g., main).
+  - Compare branch: This is your feature branch that contains the changes (e.g., `feature/contact-page`).  
+
+GitHub will show you a comparison of the changes between the two branches. Review them to ensure they're what you expect.  
+5. Create the Pull Request:  
+
+  - Provide a clear and concise title for your PR (e.g., "Add Contact Us Page").  
+  - Write a detailed description explaining what changes you made, why you made them, any potential issues, or how to test them. This is crucial for reviewers!  
+  
+  - You can also:  
+    - Assign reviewers: Choose team members who need to review your code.  
+    - Link issues: Connect your PR to any relevant GitHub issues.  
+    - Add labels: Categorize your PR (e.g., feature, bug).  
+
+Click the green **"Create pull request"** button.  
+
+6. Reviewing and Merging a Pull Request  
+
+Once a Pull Request is created, the collaborative process begins!  
+
+**As a Reviewer:**
+
+- Review Changes: Look at the "Files changed" tab to see the code modifications.
+- Leave Comments: You can click on specific lines of code to add comments, ask questions, or suggest alternative solutions.
+- Approve/Request Changes: Once you've reviewed, you can either **"Approve"** the PR, **"Request changes"** (if modifications are needed), or simply **"Comment"** without a formal decision.
+
+**As the Author (or team lead):**
+
+- Address Feedback: Respond to comments and make any necessary changes to your code. If you make new commits on your feature branch locally and `git push origin feature/contact-page`, those new commits will automatically appear in your open Pull Request on GitHub.
+- Merge the Pull Request: Once all feedback is addressed, required checks pass, and the PR is approved, anyone with merge permissions can click the **"Merge pull request"** button on GitHub.
+  - GitHub offers different merge strategies:
+    - **Merge commit:** Creates a new commit that records the merge.
+    - **Squash and merge:** Combines all your feature branch commits into a single new commit on `main`. Great for keeping main's history clean.
+    - **Rebase and merge:** Reapplies your feature branch commits on top of main, creating a linear history.
+
+7. Deleting the Feature Branch (Optional but Recommended)
+
+  After your feature branch has been successfully merged into `main` and pushed to GitHub, you typically don't need the feature branch anymore. Deleting it keeps your repository tidy.
+
+  1. Delete the branch on GitHub:
+After merging a PR, GitHub usually gives you an option to "Delete branch." Click that.
+
+  2. Delete the branch locally:
+First, ensure you're not on the branch you want to delete. Switch back to `main`:
+```{bash, eval=FALSE}
+git checkout main
+```
+  Then, delete the local branch:
+```{bash, eval=FALSE}
+git branch -d feature/contact-page
+```
+We are all set to be a full stack developer. 
+
